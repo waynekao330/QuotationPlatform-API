@@ -22,7 +22,7 @@ def handleGetAIOCRResult(request: HttpRequest) -> JsonResponse:
         data = getJsonFromRequest(request)
         response = {
             'ErrorMessage': '',
-            'ProcessType': 'S',
+            'ProcessType': '',
         }
         res_data = []
         TxNId = data.get("TxNId")
@@ -61,8 +61,11 @@ def handleGetAIOCRResult(request: HttpRequest) -> JsonResponse:
                 except Exception as e:
                     logger.error(traceback.format_exc())
                     pass
-            response['RespData'] = res_data
+            response["ProcessType"] = res.get("ProcessType")   
+            #response['RespData'] = res_data
+        logger.info("response:{}".format( response)) 
         return JsonResponse(response)
+        
     except Exception as e:
         logger.error(traceback.format_exc())
         return JsonResponse({

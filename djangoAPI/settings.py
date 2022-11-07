@@ -217,7 +217,6 @@ SIMPLE_JWT = {
 
 MOCK_MAPPING_RESPONSE = {
         "ProcessType": "S",
-        "ErrorMessage": "",
-        "data": []
+        "ErrorMessage": ""
     }
 

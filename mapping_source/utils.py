@@ -42,7 +42,7 @@ def extractDataFromOCR(model: GetPartMappingSourceOCRModel) -> dict:
     return {
         "LineItemRecordID": model.LineItemRecordID,
         "base64string": model.File,
-        "data_type": model.MimeType
+        "data_type": model.MimeType.lower()
     }
 
 

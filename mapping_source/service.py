@@ -1,4 +1,5 @@
 import base64
+import time
 import traceback
 from random import choice
 
@@ -30,7 +31,7 @@ def handleGetPartMappingSource(request: HttpRequest) -> JsonResponse:
                 res_data.append(model_to_dict(model))
                 RFQFormID = model.RFQRecordID
 
-        res["data"] = res_data
+        #res["data"] = res_data
         # 都做完才做ai mapping 跟發送SF
         sent_ai_mapping(data.get("TxNId"), RFQFormID)
         return JsonResponse(res)
@@ -109,6 +110,7 @@ def sent_ai_mapping(TxNId: str, RFQFormID: str):
                 "Description": model.CustomerDescription,
             })
     # 1-2 取值
+    time.sleep(10)
     for ocr in ocr_list:
         ocr.IsPost = True
         ocr.save()
@@ -122,7 +124,7 @@ def sent_ai_mapping(TxNId: str, RFQFormID: str):
                 "IsParent": ocr.IsParent,
                 "CustomerPartNo": roi.get("CustomerPartNumber"),
                 "Vendor": roi.get("Vendor"),
-                "qty": roi.get("Qty"),
+                "qty": roi.get("QTY"),
                 "CustomerDescription": roi.get("CustomerDescription")
             }
             post_data.append({
