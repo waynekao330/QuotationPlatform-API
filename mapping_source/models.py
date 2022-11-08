@@ -36,7 +36,7 @@ class GetPartMappingSourceOCRModel(models.Model):
     ProcessType = models.TextField(blank=True, null=True)
     ocr_roi = models.TextField(blank=True, null=True)
     ocr_roi_cnt = models.TextField(blank=True, null=True)
-    ai_mapping_result = models.BooleanField(default=False)
+    ai_ocr_result = models.BooleanField(default=False)
     IsParent = models.BooleanField(blank=True, null=True)
     IsPost = models.BooleanField(default=False)
     RFQFormID = models.TextField(blank=True, null=True)

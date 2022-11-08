@@ -47,7 +47,7 @@ def handleGetAIOCRResult(request: HttpRequest) -> JsonResponse:
                                 
                                 # data["base64string"] = str(base64.b64encode(str(data["base64string"]).encode()))
                                 res = postAPI(data, urlList.get("QP_GetPartNoMappingSource_OCR"))
-                                logger.info("1-2Respdata: {}".format(res.get("response")))
+                                logger.info("1-2Respdata: {}".format(res))
                                 if res:
                                     updateGetPartMappingSourceOCRModel(res, model)
                                     logger.info("[updateGetPartMappingSourceOCRModel] [res]: {}".format(res))
@@ -61,8 +61,11 @@ def handleGetAIOCRResult(request: HttpRequest) -> JsonResponse:
                 except Exception as e:
                     logger.error(traceback.format_exc())
                     pass
-            response["ProcessType"] = res.get("ProcessType")   
-            #response['RespData'] = res_data
+            if res != None:    
+                response["ProcessType"] = res.get("ProcessType")   
+                #response['RespData'] = res_data
+            else:
+                response["ProcessType"] = "S"   
         logger.info("response:{}".format( response)) 
         return JsonResponse(response)
         

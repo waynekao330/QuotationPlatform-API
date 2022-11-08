@@ -48,6 +48,7 @@ def extractDataFromOCR(model: GetPartMappingSourceOCRModel) -> dict:
 
 def updateGetPartMappingSourceOCRModel(data: dict, model: GetPartMappingSourceOCRModel):
     model.ProcessType = data.get("ProcessType")
+    model.ai_ocr_result = True
     model.ocr_roi = ujson.dumps(data.get("RespData")[0].get("ocr_roi"),ensure_ascii=False)
     model.ocr_roi_cnt = data.get("RespData")[0].get("ocr_roi_cnt")
     model.save()
