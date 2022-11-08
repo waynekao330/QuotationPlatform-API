@@ -114,24 +114,29 @@ def sent_ai_mapping(TxNId: str, RFQFormID: str):
     for ocr in ocr_list:
         ocr.IsPost = True
         ocr.save()
-        cor_json = ujson.loads(ocr.ocr_roi)
-        for roi in cor_json[0]:
-            # 建立mapping 物件
-            sf_key = base64.b64encode(roi.get("CustomerDescription").encode('UTF-8')).decode('UTF-8')
-            sf_ob[sf_key] = {
-                "RFQFormID":ocr.RFQFormID,
-                "LineItemRecordID": ocr.LineItemRecordID,
-                "IsParent": ocr.IsParent,
-                "CustomerPartNo": roi.get("CustomerPartNumber"),
-                "Vendor": roi.get("Vendor"),
-                "qty": roi.get("QTY"),
-                "CustomerDescription": roi.get("CustomerDescription")
-            }
-            post_data.append({
-                "LineItemRecordID": ocr.LineItemRecordID,
-                "CustomerPartNumber": roi.get("CustomerPartNumber"),
-                "Description": roi.get("CustomerDescription"),
-            })
+        try:
+            if ocr.ocr_roi:
+                cor_json = ujson.loads(ocr.ocr_roi)
+                for roi in cor_json[0]:
+                # 建立mapping 物件
+                    sf_key = base64.b64encode(roi.get("CustomerDescription").encode('UTF-8')).decode('UTF-8')
+                    sf_ob[sf_key] = {
+                        "RFQFormID":ocr.RFQFormID,
+                        "LineItemRecordID": ocr.LineItemRecordID,
+                        "IsParent": ocr.IsParent,
+                        "CustomerPartNo": roi.get("CustomerPartNumber"),
+                        "Vendor": roi.get("Vendor"),
+                        "qty": roi.get("QTY"),
+                        "CustomerDescription": roi.get("CustomerDescription")
+                    }
+                    post_data.append({
+                        "LineItemRecordID": ocr.LineItemRecordID,
+                        "CustomerPartNumber": roi.get("CustomerPartNumber"),
+                        "Description": roi.get("CustomerDescription"),
+                    })
+        except Exception as e:
+            print(e)
+            pass
 
     # 處理完所有檔案發送到ai mapping
     logger.info("sf_ob: {}".format(ujson.dumps(sf_ob,ensure_ascii=False)))
