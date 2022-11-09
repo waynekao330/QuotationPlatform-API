@@ -22,7 +22,7 @@ def handleGetAIOCRResult(request: HttpRequest) -> JsonResponse:
         data = getJsonFromRequest(request)
         response = {
             'ErrorMessage': '',
-            'ProcessType': '',
+            'ProcessType': 'S',
         }
         res_data = []
         TxNId = data.get("TxNId")
@@ -31,7 +31,6 @@ def handleGetAIOCRResult(request: HttpRequest) -> JsonResponse:
             for i in data.get("Data"):
                 try:
                     lineItemRecordID = i.get("LineItemRecordID")
-
                     if i.get("Attachments"):
                         # 這裡紀錄檔案數量，當到的時候發送到後端
                         count = 0
@@ -41,7 +40,7 @@ def handleGetAIOCRResult(request: HttpRequest) -> JsonResponse:
                             attach["IsParent"] = False
                             attach["RFQFormID"] = RFQFormID
                             model = getPartMappingSourceOCRSave(attach)
-                            if model:
+                            if model and getattr(model,"File"):
                                 # 呼叫OCR
                                 data = extractDataFromOCR(model)
                                 
@@ -57,15 +56,16 @@ def handleGetAIOCRResult(request: HttpRequest) -> JsonResponse:
                                         res_data.append(resp_data)
                                     else:
                                         res_data = {"error": "OCR API error"}
-
                 except Exception as e:
                     logger.error(traceback.format_exc())
                     pass
-            if res != None:    
-                response["ProcessType"] = res.get("ProcessType")   
-                #response['RespData'] = res_data
-            else:
-                response["ProcessType"] = "S"   
+            try:
+                if res:    
+                    response["ProcessType"] = res.get("ProcessType")   
+                    #response['RespData'] = res_data
+            except Exception as e:
+                    logger.error(traceback.format_exc())
+                    pass
         logger.info("response:{}".format( response)) 
         return JsonResponse(response)
         
