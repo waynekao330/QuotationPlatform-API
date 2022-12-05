@@ -1,4 +1,5 @@
 import logging
+import os
 
 import requests
 import ujson as ujson
@@ -39,7 +40,7 @@ def patchAPI_with_bearer(data: list, url: str):
 
 
 def get_jwt_token() -> str:
-    res = requests.get(urlList.get("JWTLogin"), auth=HTTPBasicAuth(jwt_login_account.get("username")
+    res = requests.get(os.getenv("JWTLogin"), auth=HTTPBasicAuth(jwt_login_account.get("username")
                                                                    , jwt_login_account.get("password")), verify=False)
     return res.json().get("access_token")
 
@@ -49,3 +50,11 @@ def get_api_without_wait(url: str):
         requests.get(url, timeout=0.0000000001)
     except requests.exceptions.ReadTimeout:
         pass
+
+
+def check_access_key(key: str) -> bool:
+    print(key)
+    if key != getattr(settings, "ACCESS_KEY", str):
+        return False
+    else:
+        return True

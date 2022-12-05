@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from typing import Type
 
 from ai_mapping_result.models import GetMappingSourceModel
@@ -54,6 +55,7 @@ def updateGetMappingSourceModel(data: dict, model: GetMappingSourceModel) -> Typ
 
 
 def sent_to_UpdateAIMappingResul(data: list):
-    url = urlList.get("UpdateAIMappingResult")
+    url = os.getenv("UpdateAIMappingResult")
     res = patchAPI_with_bearer(data, url)
     logger.info("SF_UpdateAIMappingResult res code: {}, content: {}".format(res.status_code, res.content))
+

@@ -1,4 +1,5 @@
 import logging
+import os
 
 from django.http import HttpRequest, JsonResponse
 
@@ -22,7 +23,7 @@ def handleGetWinRate(request: HttpRequest) -> JsonResponse:
             "LineItemRecordID": model.LineItemRecordID
         }
         data = extractDataFromWinRate(model)
-        res = postAPI(data, urlList.get("WinRate"))
+        res = postAPI(data, os.getenv("WinRate"))
         logger.info("[updateGetPartMappingSourceOCRModel] [res]: {}".format(res))
         updateWinRateModel(res, model)
         response["winRate"] = model.winRate

@@ -1,4 +1,5 @@
 import logging
+import os
 import traceback
 
 import ujson
@@ -38,7 +39,7 @@ def handleGetAIMappingResult(lineItemRecordID: str) -> JsonResponse:
                 model = getPartMappingSourceSave(roi, lineItemRecordID)
                 if model:
                     data = extractDataFromSource(model)
-                    res = postAPI(data, urlList.get("GetAIMappingResult"))
+                    res = postAPI(data, os.getenv("GetAIMappingResult"))
                     model = updateGetMappingSourceModel(res.get("response").get("RespData")[0], model)
                     patch_data.append({
                         "PartMappingJSON": ujson.dumps(res.get("response")),
@@ -66,7 +67,7 @@ def sent_ai_mapping(model: GetPartMappingSourceModel):
             }, model.LineItemRecordID)
             if req:
                 data = extractDataFromSource(req)
-                res = postAPI(data, urlList.get("GetAIMappingResult"))
+                res = postAPI(data, os.getenv("GetAIMappingResult"))
                 # 把isParent塞進RespData
                 if res.get("RespData"):
                     for resp in res.get("RespData"):
@@ -90,7 +91,7 @@ def ocr_call_ai_mapping(resp_list: list, LineitemRecordID: str, TxNId: str, IsPa
                 }
                 print("req for ai mapping".format(req))
                 if req:
-                    res = postAPI(req, urlList.get("GetAIMappingResult"))
+                    res = postAPI(req, os.getenv("GetAIMappingResult"))
                     print("ocr aimapping res: {}".format(res))
                     if res:
                         # ai mapping res RespData add IsParent

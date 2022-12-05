@@ -1,4 +1,5 @@
 import logging
+import os
 import traceback
 
 from django.http import HttpRequest, JsonResponse
@@ -27,6 +28,7 @@ def handleGetAIOCRResult(request: HttpRequest) -> JsonResponse:
         res_data = []
         TxNId = data.get("TxNId")
         RFQFormID = data.get("RFQFormID")
+        ocr_error_chain = []
         if data.get("Data"):
             for i in data.get("Data"):
                 try:
@@ -45,7 +47,7 @@ def handleGetAIOCRResult(request: HttpRequest) -> JsonResponse:
                                 data = extractDataFromOCR(model)
                                 
                                 # data["base64string"] = str(base64.b64encode(str(data["base64string"]).encode()))
-                                res = postAPI(data, urlList.get("QP_GetPartNoMappingSource_OCR"))
+                                res = postAPI(data, os.getenv("QP_GetPartNoMappingSource_OCR"))
                                 logger.info("1-2Respdata: {}".format(res))
                                 if res:
                                     updateGetPartMappingSourceOCRModel(res, model)
@@ -56,17 +58,21 @@ def handleGetAIOCRResult(request: HttpRequest) -> JsonResponse:
                                         res_data.append(resp_data)
                                     else:
                                         res_data = {"error": "OCR API error"}
+                                        ocr_error_chain.append(attach.get("FileName"))
+                                else:
+                                    ocr_error_chain.append(attach.get("FileName"))
                 except Exception as e:
                     logger.error(traceback.format_exc())
                     pass
             try:
                 if res:    
-                    response["ProcessType"] = res.get("ProcessType")   
+                    response["ProcessType"] = res.get("ProcessType")
                     #response['RespData'] = res_data
             except Exception as e:
                     logger.error(traceback.format_exc())
                     pass
-        logger.info("response:{}".format( response)) 
+        response["ErrorMessage_OCR"] = ocr_error_chain
+        logger.info("response:{}".format( response))
         return JsonResponse(response)
         
     except Exception as e:

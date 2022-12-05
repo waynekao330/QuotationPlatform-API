@@ -220,3 +220,5 @@ MOCK_MAPPING_RESPONSE = {
         "ErrorMessage": ""
     }
 
+
+ACCESS_KEY="ZNV4feF4h8vDGR8Ks5F9dZDAruxzWUdHx8R3X9QsH4RnNAbfdbRdN8HtRF2CYPuT"
