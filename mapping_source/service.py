@@ -1,4 +1,5 @@
 import base64
+import os
 import time
 import traceback
 from random import choice
@@ -55,7 +56,7 @@ def handleGetPartMappingSourceOCR(request: HttpRequest) -> JsonResponse:
             model = getPartMappingSourceOCRSave(i)
             if model:
                 data = extractDataFromOCR(model)
-                res = postAPI(data, urlList.get("QP_GetPartNoMappingSource_OCR"))
+                res = postAPI(data, os.getenv("QP_GetPartNoMappingSource_OCR"))
                 updateGetPartMappingSourceOCRModel(res.get("response"), model)
                 aa = res.get("response").get("RespData")[0]
                 print(aa)
@@ -73,6 +74,10 @@ def sent_ai_mapping(TxNId: str, RFQFormID: str):
     # 這裡先建一個表以CustomerDescription 為key 為了好merge
     sf_ob = {}
     post_data = []
+    # add ocr error chain
+    ocr_error_chain = []
+    # add ai mapping error message
+    ai_mapping_error = ""
     part_mapping_list = GetPartMappingSourceModel.objects.filter(TxNId=TxNId).filter(
         IsPost=False)
     ocr_list = GetPartMappingSourceOCRModel.objects.filter(RFQFormID=RFQFormID).filter(
@@ -110,7 +115,7 @@ def sent_ai_mapping(TxNId: str, RFQFormID: str):
                 "Description": model.CustomerDescription,
             })
     # 1-2 取值
-    time.sleep(10)
+    #time.sleep(10)
     for ocr in ocr_list:
         ocr.IsPost = True
         ocr.save()
@@ -134,6 +139,9 @@ def sent_ai_mapping(TxNId: str, RFQFormID: str):
                         "CustomerPartNumber": roi.get("CustomerPartNumber"),
                         "Description": roi.get("CustomerDescription"),
                     })
+            else:
+                # 如果沒有orc_roi 視為沒成功 ocr_error_chain 加入檔案名稱
+                ocr_error_chain.append(ocr.FileName)
         except Exception as e:
             print(e)
             pass
@@ -142,7 +150,10 @@ def sent_ai_mapping(TxNId: str, RFQFormID: str):
     logger.info("sf_ob: {}".format(ujson.dumps(sf_ob,ensure_ascii=False)))
     ai_mapping_request["dict_data"]["Data"][0]["Records"] = post_data
     logger.info("ai_mapping_request: {}".format(ujson.dumps(ai_mapping_request,ensure_ascii=False)))
-    ai_mapping_res = postAPI(ai_mapping_request, urlList.get("GetAIMappingResult"))
+    ai_mapping_res = postAPI(ai_mapping_request, os.getenv("GetAIMappingResult"))
+    # 將ai mapping 儲存到DB
+    save_ai_mapping_result(ai_mapping_request, ai_mapping_res)
+
     logger.info("ai_mapping_res: {}".format(ujson.dumps(ai_mapping_res,ensure_ascii=False)))
     logger.info("GetAIMappingResult all done to ai mapping")
     if ai_mapping_res:
@@ -153,10 +164,13 @@ def sent_ai_mapping(TxNId: str, RFQFormID: str):
             if sf_ob.get(sf_key):
                 sf_ob[sf_key][
                     "Records"] = res_data.get("Records")
+        ai_mapping_error = ai_mapping_res.get("ErrorMessage")
+
     # 都填完了就準備新增到SF
     sf_req = {
         "ProcessType": "S",
-        "ErrorMessage": "",
+        "ErrorMessage_OCR": ocr_error_chain,
+        "ErrorMessage_AI": ai_mapping_error,
         "RespData": list(sf_ob.values())
     }
     patch_data = [{"PartMappingJSON": ujson.dumps(sf_req,ensure_ascii=False),

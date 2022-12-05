@@ -4,7 +4,7 @@ import traceback
 import ujson
 from django.forms import model_to_dict
 
-from mapping_source.models import GetPartMappingSourceOCRModel, GetPartMappingSourceModel
+from mapping_source.models import GetPartMappingSourceOCRModel, GetPartMappingSourceModel, AiMappingResult
 from mapping_source.serializers import GetPartMappingSourceModelSerializer, GetPartMappingSourceModelOCRSerializer
 
 # Get an instance of a logger
@@ -52,3 +52,10 @@ def updateGetPartMappingSourceOCRModel(data: dict, model: GetPartMappingSourceOC
     model.ocr_roi = ujson.dumps(data.get("RespData")[0].get("ocr_roi"),ensure_ascii=False)
     model.ocr_roi_cnt = data.get("RespData")[0].get("ocr_roi_cnt")
     model.save()
+
+def save_ai_mapping_result(request: dict, response: dict):
+    ai_mapping_result = AiMappingResult(
+        request=ujson.dumps(request),
+        response=ujson.dumps(response)
+    )
+    ai_mapping_result.save()

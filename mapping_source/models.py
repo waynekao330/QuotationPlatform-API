@@ -41,3 +41,8 @@ class GetPartMappingSourceOCRModel(models.Model):
     IsPost = models.BooleanField(default=False)
     RFQFormID = models.TextField(blank=True, null=True)
 
+class AiMappingResult(models.Model):
+    id = models.AutoField(primary_key=True)
+    request = models.TextField(null=True)
+    response = models.TextField(null=True)
+    created_at = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
