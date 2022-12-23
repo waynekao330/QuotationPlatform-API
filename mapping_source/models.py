@@ -34,6 +34,7 @@ class GetPartMappingSourceOCRModel(models.Model):
     MimeType = models.TextField(blank=True, null=False)
     File = models.TextField(blank=True, null=False)
     ProcessType = models.TextField(blank=True, null=True)
+    ErrorMessage = models.TextField(blank=True, null=True)
     ocr_roi = models.TextField(blank=True, null=True)
     ocr_roi_cnt = models.TextField(blank=True, null=True)
     ai_ocr_result = models.BooleanField(default=False)

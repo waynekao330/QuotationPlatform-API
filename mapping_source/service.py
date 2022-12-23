@@ -81,7 +81,8 @@ def sent_ai_mapping(TxNId: str, RFQFormID: str):
     part_mapping_list = GetPartMappingSourceModel.objects.filter(TxNId=TxNId).filter(
         IsPost=False)
     ocr_list = GetPartMappingSourceOCRModel.objects.filter(RFQFormID=RFQFormID).filter(
-        IsPost=False)
+        ai_ocr_result=False)
+    logger.info("ocrlist: {}".format(list(ocr_list)))
     # 這邊要去組request
     ai_mapping_request = {
         "dict_data": {
@@ -120,7 +121,7 @@ def sent_ai_mapping(TxNId: str, RFQFormID: str):
         ocr.IsPost = True
         ocr.save()
         try:
-            if ocr.ocr_roi:
+            if ocr.ocr_roi and ocr.ocr_roi!="[]" and ocr.ocr_roi!='"None"':
                 cor_json = ujson.loads(ocr.ocr_roi)
                 for roi in cor_json[0]:
                 # 建立mapping 物件
@@ -141,7 +142,8 @@ def sent_ai_mapping(TxNId: str, RFQFormID: str):
                     })
             else:
                 # 如果沒有orc_roi 視為沒成功 ocr_error_chain 加入檔案名稱
-                ocr_error_chain.append(ocr.FileName)
+                ocr_error_string = ocr.FileName+" - "+ocr.ErrorMessage
+                ocr_error_chain.append(ocr_error_string)
         except Exception as e:
             print(e)
             pass

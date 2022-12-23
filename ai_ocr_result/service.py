@@ -66,13 +66,13 @@ def handleGetAIOCRResult(request: HttpRequest) -> JsonResponse:
                     pass
             try:
                 if res:    
-                    response["ProcessType"] = res.get("ProcessType")
+                    response["ProcessType"] = "S"
                     #response['RespData'] = res_data
             except Exception as e:
                     logger.error(traceback.format_exc())
                     pass
         response["ErrorMessage_OCR"] = ocr_error_chain
-        logger.info("response:{}".format( response))
+        logger.info("response:{}".format(response))
         return JsonResponse(response)
         
     except Exception as e:
